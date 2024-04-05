@@ -98,104 +98,20 @@ extern "C" {
 	    void check_sensor_connection(void);
 		int inv_load_dmp(char *dmp_path, int dmp_version, const char *dmp_firmware_path);
 		void print_help(void);
-		int process_sysfs_request(char *data);	
+		int process_sysfs_request(char *data);
+		int init(int dur, int sample, int freq);
+		void getData(int counter);
 }
 
 
 
 int main(int argc, char *argv[]){
-	std::cout << "Hello" << std::endl;
-	FILE *fp;
-	// FILE *log_fp;
-	char *buffer;
-	char file_name[100];
-	int i;
-	// int j;
-	// int bytes;
-	// int total_bytes;
-	// int target_bytes;
-	// int scan_bytes;
-	// long long timestamp, last_timestamp;
-	int counter;
-	int num_sensors;
-	int ready;
-	int index;
-	int nfds, num_open_fds;
-	struct pollfd pfds[1];
-	int dur, sample, freq;
-	char *log_file;
-	int c, fp_writes;
-	int load_firmware_flag;
-	unsigned int retry = 0;
+	int dur = 10;
+	int sample = 80;
+	int freq = 5;
+	int counter = init(dur,sample,freq);
 
-	buffer = (char *)orig_buffer;
-	printf("\n\nTDK-Robotics-RB5-chx01-app-%d.%d\n\n",
-		VER_MAJOR, VER_MINOR);
-	printf("RangeFinder version: %s\n", invn_algo_rangefinder_version());
-	printf("Cliff detection version %s\n",
-				invn_algo_cliff_detection_version());
-	printf("Floor type detection %s\n", invn_algo_floor_type_fxp_version());
-	printf("Obstacle position %s\n", invn_algo_obstacleposition_version());
-
-	// get absolute IIO path & build MPU's sysfs paths
-	if (process_sysfs_request(sysfs_path) < 0) {
-		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
-		exit(0);
-	}
-
-	printf("%s sysfs path: %s, dev path=%s\n",
-		CHIRP_NAME, sysfs_path, dev_path);
-
-	dur = 10;
-	sample = 80;
-	freq = 5;
-	log_file = "/usr/chirp.csv";
-	load_firmware_flag = 1;
-
-	opterr = 0;
-	printf("options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
-	log_file, freq, sample, dur);
-
-	printf("firmware load=%d\n", load_firmware_flag);
-	if (load_firmware_flag) {
-		if (inv_load_dmp(sysfs_path,
-			CH101_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-			printf("CH101 firmware fail\n");
-			return -EINVAL;
-		}
-
-		if (inv_load_dmp(sysfs_path,
-			CH201_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-			printf("CH201 firmware fail\n");
-			return -EINVAL;
-		}
-	}
-
-	index = 0;
-	counter = freq*dur;
-	for (i = 0; i < 6; i++) {
-		snprintf(file_name, 100, "%s/in_positionrelative%d_raw",
-			sysfs_path, i+18);
-		fp = fopen(file_name, "w+");
-		if (fp == NULL) {
-			printf("error opening %s\n", file_name);
-			exit(0);
-		} else {
-			printf("open %s OK, with %d\n", file_name, sample);
-		}
-		fprintf(fp, "%d", sample);
-		fscanf(fp, "%d", &op_freq[i]);
-		fclose(fp);
-		if (op_freq[i])
-			sensor_connected[i] = 1;
-		else
-			sensor_connected[i] = 0;
-	}
-	for (i = 3; i < 6; i++)
-		printf("%d, %d\n", sensor_connected[i], op_freq[i]);
-
-	for (i = 0; i < 3; i++)
-		printf("%d, %d\n", sensor_connected[i], op_freq[i]);
+	getData(counter);
 
 	return 0;
 

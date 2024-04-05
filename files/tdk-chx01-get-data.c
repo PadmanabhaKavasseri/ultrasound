@@ -966,67 +966,22 @@ int loadFirmware(){
 	}
 }
 
-
-int init(int dur, int sample, int freq){
-	printf("\n\nTDK-Robotics-RB5-chx01-app-%d.%d\n\n",VER_MAJOR, VER_MINOR);
-	printf("RangeFinder version: %s\n", invn_algo_rangefinder_version());
-
-	if (process_sysfs_request(sysfs_path) < 0) {
-		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
-		exit(0);
-	}
-
-	printf("%s sysfs path: %s, dev path=%s\n",CHIRP_NAME, sysfs_path, dev_path);
-
-	if(loadFirmware() == -EINVAL){
-		return -EINVAL;
-	}
-
-	int counter = confSensors(dur,sample,freq);
-
-	return counter;
-
-}
-
-
-int main(int argc, char *argv[])
-{
-	// FILE *fp;
-	// FILE *log_fp;
-	char *buffer;
-	// char file_name[100];
-	int i, j, bytes;
-	int total_bytes;
+void getData(int counter){
 	int target_bytes;
-	// int scan_bytes;
-	long long timestamp, last_timestamp;
-	// int counter;
-	// int num_sensors;
-	int ready;
-	// int index;
-	int nfds, num_open_fds;
-	struct pollfd pfds[1];
-	int dur, sample, freq;
-	// char *log_file;
-	int c, fp_writes;
-	int load_firmware_flag;
-	unsigned int retry = 0;
-
+	char *buffer;
 	buffer = (char *)orig_buffer;
-
-	//TODO read dur sample and freq?
-	dur = 10;
-	sample = 80;
-	freq = 5;
-	int counter = init(dur,sample,freq);
-
+	long long timestamp, last_timestamp;
+	int ready;
+	int c, fp_writes;
+	struct pollfd pfds[1];
+	int nfds, num_open_fds;
+	int bytes;
+	int total_bytes;
+	int i,j;
+	unsigned int retry = 0;
 
 	last_timestamp = 0;
 	timestamp = 0;
-	
-
-	
-
 
 	pfds[0].fd = open(dev_path, O_RDONLY);
 	pfds[0].events = (POLLIN | POLLRDNORM | POLLERR |POLLNVAL );
@@ -1082,8 +1037,8 @@ int main(int argc, char *argv[])
 
 				index -= 7;
 				fp_writes++;
-				log_data(fp_writes, num_sensors, sample, log_fp,
-					last_timestamp);
+				// log_data(fp_writes, num_sensors, sample, log_fp,
+				// 	last_timestamp);
 
 				index = 0;
 				last_timestamp = timestamp;
@@ -1155,6 +1110,38 @@ int main(int argc, char *argv[])
 	else
 		printf("FAIL: setting=%d, get=%d\n", counter, fp_writes);
 
+}
+
+int init(int dur, int sample, int freq){
+	printf("\n\nTDK-Robotics-RB5-chx01-app-%d.%d\n\n",VER_MAJOR, VER_MINOR);
+	printf("RangeFinder version: %s\n", invn_algo_rangefinder_version());
+
+	if (process_sysfs_request(sysfs_path) < 0) {
+		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
+		exit(0);
+	}
+
+	printf("%s sysfs path: %s, dev path=%s\n",CHIRP_NAME, sysfs_path, dev_path);
+
+	if(loadFirmware() == -EINVAL){
+		return -EINVAL;
+	}
+
+	int counter = confSensors(dur,sample,freq);
+
+	return counter;
+
+}
+
+
+int main(int argc, char *argv[])
+{
+	int dur = 10;
+	int sample = 80;
+	int freq = 5;
+	int counter = init(dur,sample,freq);
+
+	getData(counter);
 
 	return 0;
 }
