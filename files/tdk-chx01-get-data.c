@@ -82,11 +82,25 @@ union InvnCliffDetection {
 #define CH101_DEFAULT_FW       2
 #define CH201_DEFAULT_FW       5
 
+
+#define FILE_PATH_0 "/sys/bus/iio/devices/iio:device4/in_positionrelative18_raw"
+#define FILE_PATH_1 "/sys/bus/iio/devices/iio:device4/in_positionrelative19_raw"
+#define FILE_PATH_2 "/sys/bus/iio/devices/iio:device4/in_positionrelative20_raw"
+#define FILE_PATH_3 "/sys/bus/iio/devices/iio:device4/in_positionrelative21_raw"
+#define FILE_PATH_4 "/sys/bus/iio/devices/iio:device4/in_positionrelative22_raw"
+#define FILE_PATH_5 "/sys/bus/iio/devices/iio:device4/in_positionrelative23_raw"
+
+
+
 #define VER_MAJOR (0)
 #define VER_MINOR (7)
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define MAX_CH_IIO_BUFFER 256
+
+// Global array of file paths
+char* filePaths[] = {FILE_PATH_0, FILE_PATH_1, FILE_PATH_2, FILE_PATH_3, FILE_PATH_4, FILE_PATH_5};
+
 
 static const char  *const fw_names[] = {
 "v39.hex",
@@ -330,7 +344,7 @@ int inv_load_dmp(char *dmp_path, int dmp_version,
 		return -EINVAL;
 	}
 
-	printf("file=%s\n", firmware_file);
+	// printf("file=%s\n", firmware_file);
 
 	if (dmp_version != 0xff)
 		p = (const void *)fw_names[dmp_version];
@@ -341,7 +355,7 @@ int inv_load_dmp(char *dmp_path, int dmp_version,
 	if (write_size > 30)
 		write_size = 30;
 
-	printf("input name=%s\n", p);
+	// printf("input name=%s\n", p);
 
 	bytesWritten = fwrite(p, 1, write_size, fp);
 	
@@ -357,12 +371,10 @@ int inv_load_dmp(char *dmp_path, int dmp_version,
 
 	if (dmp_version != 0xff) {
 		if (result == 0)
-			printf("dmp firmware %s written to %s\n",
-				fw_names[dmp_version], firmware_file);
+			// printf("dmp firmware %s written to %s\n",fw_names[dmp_version], firmware_file);
 
 		if (dmp_version >= fw_names_size) {
-			printf("dmp_version %d out of range [0-%d]\n",
-				dmp_version, fw_names_size);
+			// printf("dmp_version %d out of range [0-%d]\n",dmp_version, fw_names_size);
 			return -EINVAL;
 		}
 
@@ -427,8 +439,8 @@ int check_sensor_connection(void)
 		snprintf(file_name, 100, "%s/in_positionrelative%d_raw",
 			sysfs_path, i+18);
 		fp = fopen(file_name, "rt");
-		printf("DEBUG :: filename:: %s :\n", file_name);
-		printf("DEBUG :: filename:: %s :\n", sysfs_path);
+		// printf("Check Sensor Connection :: filename:: %s :\n", file_name);
+		// printf("Check Sensor Connection :: sysfs_path:: %s :\n", sysfs_path);
 		if (fp == NULL) {
 			printf("error opening %s\n", file_name);
 			exit(0);
@@ -443,11 +455,11 @@ int check_sensor_connection(void)
 			sensor_connected[i] = 0;
 	}
 
-	for (i = 3; i < 6; i++)
-		printf("%d, %d\n", sensor_connected[i], op_freq[i]);
+	// for (i = 3; i < 6; i++)
+	// 	printf("%d, %d\n", sensor_connected[i], op_freq[i]);
 
-	for (i = 0; i < 3; i++)
-		printf("%d, %d\n", sensor_connected[i], op_freq[i]);
+	// for (i = 0; i < 3; i++)
+	// 	printf("%d, %d\n", sensor_connected[i], op_freq[i]);
 
 	return 0;
 }
@@ -484,7 +496,7 @@ int find_type_by_name(const char *name, const char *type)
 		    strlen(ent->d_name) > strlen(type) &&
 		    strncmp(ent->d_name, type, strlen(type)) == 0) {
 
-			printf("name: %s\n", ent->d_name);
+			// printf("name: %s\n", ent->d_name);
 
 			numstrlen = sscanf(ent->d_name + strlen(type),
 					   "%d", &number);
@@ -639,7 +651,7 @@ int switch_streaming(int on)
 		printf("error opening master enable\n");
 		exit(0);
 	} else {
-		printf("open master enable OK\n");
+		// printf("open master enable OK\n");
 	}
 	fprintf(fp, "%d", 1 & on);
 	fclose(fp);
@@ -873,6 +885,7 @@ int confSensors(int dur, int sample, int freq){
 	for (int i = 0; i < 6; i++) {
 		snprintf(file_name, 100, "%s/in_positionrelative%d_raw",
 			sysfs_path, i+18);
+		// printf("Conf Sensors :: filename:: %s :\n", file_name);
 		fp = fopen(file_name, "wt");
 		if (fp == NULL) {
 			printf("error opening %s\n", file_name);
@@ -890,6 +903,8 @@ int confSensors(int dur, int sample, int freq){
 
 	int index = 0;
 	int counter = freq*dur;
+
+	
 
 
 	for (int i = 0; i < 6; i++) {
@@ -920,32 +935,34 @@ int confSensors(int dur, int sample, int freq){
 		scan_bytes = MAX_CH_IIO_BUFFER;
 	}
 
-	printf("counter=%d\n", counter);
+	// counter = 1;
+	// printf("counter=%d\n", counter);
 
-	// counter controls how many times it will run.
-	snprintf(file_name, 100, "%s/calibbias", sysfs_path);
-	fp = fopen(file_name, "wt");
-	if (fp == NULL) {
-		printf("error opening %s\n", file_name);
-		exit(0);
-	} else {
-		printf("open %s OK\n", file_name);
-	}
-	fprintf(fp, "%d", counter);
-	fclose(fp);
+	// // counter controls how many times it will run.
+	// snprintf(file_name, 100, "%s/calibbias", sysfs_path);
+	// fp = fopen(file_name, "wt");
+	// if (fp == NULL) {
+	// 	printf("error opening %s\n", file_name);
+	// 	exit(0);
+	// } else {
+	// 	printf("counterrr open %s OK\n", file_name);
+	// }
+	// fprintf(fp, "%d", counter);
+	// fclose(fp);
 
-	snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
 
-	//sets freq
-	fp = fopen(file_name, "wt");
-	if (fp == NULL) {
-		printf("error opening %s\n", file_name);
-		exit(0);
-	} else {
-		printf("open %s OK\n", file_name);
-	}
-	fprintf(fp, "%d", freq);
-	fclose(fp);
+	// snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
+	// freq = 0;
+	// //sets freq
+	// fp = fopen(file_name, "wt");
+	// if (fp == NULL) {
+	// 	printf("error opening %s\n", file_name);
+	// 	exit(0);
+	// } else {
+	// 	printf("freq file open %s OK\n", file_name);
+	// }
+	// fprintf(fp, "%d", freq);
+	// fclose(fp);
 
 	int total_bytes = 0;
 	switch_streaming(1);
@@ -984,13 +1001,14 @@ void getData(int counter){
 	timestamp = 0;
 
 	pfds[0].fd = open(dev_path, O_RDONLY);
-	pfds[0].events = (POLLIN | POLLRDNORM | POLLERR |POLLNVAL );
+	printf("DEVPATH: %s\n", dev_path);
+	pfds[0].events = (POLLIN | POLLRDNORM | POLLERR | POLLNVAL);
 	last_timestamp = 0;
   
 	ready = 1;
 	fp_writes = 1;
 	int index = 0; //redefined in confSensors
-
+	int cnt = 0;
 	while (ready == 1) {
 
 		char *tmp;
@@ -1003,7 +1021,8 @@ void getData(int counter){
 		nfds = 1;
 
 		ready = poll(pfds, nfds, 5000);
-		//printf("pass fd  %d, poll 0x%x, ready=%d\n", pfds[0].fd,pfds[0].revents, ready);
+		printf("counter: %d, pass fd  %d, poll 0x%x, ready=%d\n", cnt++,pfds[0].fd,pfds[0].revents, ready);
+
 		if (ready == -1)
 			printf("poll error\n");
 
@@ -1067,7 +1086,7 @@ void getData(int counter){
 
 			ptr = buffer + 28*num_sensors;
 
-			printf("Here11");
+			// printf("Here11");
 			for (j = 0; j < num_sensors; j++) {
 				distance[j] = ptr[1+j*2];
 				distance[j] <<= 8;
@@ -1114,14 +1133,14 @@ void getData(int counter){
 
 int init(int dur, int sample, int freq){
 	printf("\n\nTDK-Robotics-RB5-chx01-app-%d.%d\n\n",VER_MAJOR, VER_MINOR);
-	printf("RangeFinder version: %s\n", invn_algo_rangefinder_version());
+	// printf("RangeFinder version: %s\n", invn_algo_rangefinder_version());
 
 	if (process_sysfs_request(sysfs_path) < 0) {
 		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
 		exit(0);
 	}
 
-	printf("%s sysfs path: %s, dev path=%s\n",CHIRP_NAME, sysfs_path, dev_path);
+	// printf("%s sysfs path: %s, dev path=%s\n",CHIRP_NAME, sysfs_path, dev_path);
 
 	if(loadFirmware() == -EINVAL){
 		return -EINVAL;
@@ -1133,6 +1152,365 @@ int init(int dur, int sample, int freq){
 
 }
 
+void getData2(int counter){
+	int target_bytes;
+	char *buffer;
+	buffer = (char *)orig_buffer;
+	long long timestamp, last_timestamp;
+	int ready;
+	int c, fp_writes;
+	struct pollfd pfds[1];
+	int nfds, num_open_fds;
+	int bytes;
+	int total_bytes;
+	int i,j;
+	unsigned int retry = 0;
+
+	last_timestamp = 0;
+	timestamp = 0;
+
+	pfds[0].fd = open(dev_path, O_RDONLY);
+	printf("DEVPATH: %s\n", dev_path);
+	pfds[0].events = (POLLIN | POLLRDNORM | POLLERR | POLLNVAL);
+	last_timestamp = 0;
+  
+	ready = 1;
+	fp_writes = 1;
+	int index = 0; //redefined in confSensors
+
+	
+
+	char *tmp;
+	short value;
+	char *ptr;
+	int dev_num;
+
+	pfds[0].revents = 0;
+	//printf("before new polling counter=%d\n", counter);
+	nfds = 1;
+
+	ready = poll(pfds, nfds, 5000);
+	printf("pass fd  %d, poll 0x%x, ready=%d\n", pfds[0].fd,pfds[0].revents, ready);
+	if (ready == -1)
+		printf("poll error\n");
+
+	if (pfds[0].revents & (POLLIN | POLLRDNORM)) {
+		target_bytes = scan_bytes;
+		//printf("target bytes=%d and fd = %d\n",target_bytes,pfds[0].fd);
+
+		bytes = read(pfds[0].fd, buffer, target_bytes);
+		if(bytes < 0)
+		{
+			printf("Read IIO buffer error: %s\n", strerror(errno));
+			return;
+		}
+		else if (bytes == target_bytes){
+		total_bytes += bytes;
+		tmp = (char *)&timestamp;
+		memcpy(tmp, &buffer[scan_bytes - 8], 8);
+		//printf("ts %lld\n",timestamp);
+	//amplitude 2 bytes + intensity data
+	//2 bytes 224/8 = 28bytes(IQ)+mode(1 bytes)
+		target_bytes = scan_bytes-32;
+		i = 0;
+		//for (i = 0; i < 64; i++) {
+		//	printf("%d, ", buffer[i]);
+		//}
+		//printf("\n");
+		if (last_timestamp == 0)
+			last_timestamp = timestamp;
+
+		if (last_timestamp != timestamp) {
+
+			index -= 7;
+			fp_writes++;
+			// log_data(fp_writes, num_sensors, sample, log_fp,
+			// 	last_timestamp);
+
+			index = 0;
+			last_timestamp = timestamp;
+		}
+
+		//printf("\nindex=%d\n", index);
+		for (j = 0; j < num_sensors; j++) {
+			//printf("j = %d\n", j);
+			for (i = 0; i < 7; i++) {
+				//printf("\ni=%d\n", (i+index));
+				value = buffer[i*4+1+j*28];
+				value <<= 8;
+				value += buffer[i*4+j*28];
+				I[j][i+index] = value;
+				
+				value = buffer[i*4+3+j*28];
+				value <<= 8;
+				value += buffer[i*4+2+j*28];
+				Q[j][i+index] = value;
+				//printf("%d, %d", I[j][i], Q[j][i]);
+			}
+		}
+
+		//printf("\n");
+		index += 7;
+
+		ptr = buffer + 28*num_sensors;
+
+		// printf("Here11");
+		for (j = 0; j < num_sensors; j++) {
+			distance[j] = ptr[1+j*2];
+			distance[j] <<= 8;
+			distance[j] += ptr[j*2];
+			
+			printf("distance[%d]=%d\n", j, distance[j]);
+		}
+
+
+		ptr += 2*num_sensors;
+
+		for (j = 0; j < num_sensors; j++) {
+			amplitude[j] = ptr[1+j*2];
+			amplitude[j] <<= 8;
+			amplitude[j] += ptr[j*2];
+		}
+
+		ptr += 2*num_sensors;
+
+		for (j = 0; j < num_sensors; j++)
+			mode[j] = ptr[j];
+		}
+		else
+		{
+			printf("Expected %d bytes, read %d\n",bytes,target_bytes);
+			retry++;
+			if(retry < 6)
+			{
+				printf("Max retry reached\n");
+				return;
+			}
+		}	
+	}
+
+	switch_streaming(0);
+	fclose(log_fp);
+
+	if (fp_writes == counter)
+	printf("PASS: setting=%d, get=%d\n", counter, fp_writes);
+	else
+	printf("FAIL: setting=%d, get=%d\n", counter, fp_writes);
+
+}
+
+void getPositionRelativeData(int chirp_sensor_number){
+	
+	printf("Start of getPositionRelativeData\n");
+	// Global array of file paths
+	char* filePaths[] = {FILE_PATH_0, FILE_PATH_1, FILE_PATH_2, FILE_PATH_3, FILE_PATH_4, FILE_PATH_5};
+	
+	int i;
+	FILE *fp;
+	char file_name[100];
+
+	strcpy(file_name,filePaths[chirp_sensor_number]);
+
+	fp = fopen(file_name, "rt");
+	// printf("filename:: %s :\n", file_name);
+	// printf("Check Sensor Connection :: sysfs_path:: %s :\n", sysfs_path);
+	if (fp == NULL) {
+		printf("error opening %s\n", file_name);
+		exit(0);
+	} else {
+		//printf("open %s OK\n", file_name);
+	}
+
+	uint32_t dist;
+
+	fscanf(fp, "%d", &dist);
+	fclose(fp);
+
+	if (dist){
+		printf("Sensor #%d, Dist: %d\n",chirp_sensor_number,dist);
+	}
+	else{
+		printf("Sensor #%d, Not Connected\n",chirp_sensor_number);
+	}
+	
+	return 0;
+}
+
+void pollData(int frequency){
+	//set frequency
+	//poll infinitely 
+
+	int target_bytes;
+	char *buffer;
+	buffer = (char *)orig_buffer;
+	long long timestamp, last_timestamp;
+	int ready;
+	int c, fp_writes;
+	struct pollfd pfds[1];
+	int nfds, num_open_fds;
+	int bytes;
+	int total_bytes;
+	int i,j;
+	unsigned int retry = 0;
+
+	last_timestamp = 0;
+	timestamp = 0;
+
+	pfds[0].fd = open(dev_path, O_RDONLY);
+	printf("DEVPATH: %s\n", dev_path);
+	pfds[0].events = (POLLIN | POLLRDNORM | POLLERR | POLLNVAL);
+	last_timestamp = 0;
+  
+	ready = 1;
+	fp_writes = 1;
+	int index = 0; //redefined in confSensors
+	int cnt = 0;
+	while (ready==1) {
+		char *tmp;
+		short value;
+		char *ptr;
+		int dev_num;
+
+		pfds[0].revents = 0;
+		//printf("before new polling counter=%d\n", counter);
+		nfds = 1;
+
+		ready = poll(pfds, nfds, 5000);
+		printf("counter: %d, pass fd  %d, poll 0x%x, ready=%d\n", cnt++,pfds[0].fd,pfds[0].revents, ready);
+		if (ready == -1)
+			printf("poll error\n");
+
+		if (pfds[0].revents & (POLLIN | POLLRDNORM)) {
+     		target_bytes = scan_bytes;
+			//printf("target bytes=%d and fd = %d\n",target_bytes,pfds[0].fd);
+			bytes = read(pfds[0].fd, buffer, target_bytes);
+            if(bytes < 0)
+			{
+				printf("Read IIO buffer error: %s\n", strerror(errno));
+                break;
+			}
+            else if (bytes == target_bytes){
+			total_bytes += bytes;
+			tmp = (char *)&timestamp;
+			memcpy(tmp, &buffer[scan_bytes - 8], 8);
+			//printf("ts %lld\n",timestamp);
+	//amplitude 2 bytes + intensity data
+	//2 bytes 224/8 = 28bytes(IQ)+mode(1 bytes)
+			target_bytes = scan_bytes-32;
+			i = 0;
+			//for (i = 0; i < 64; i++) {
+			//	printf("%d, ", buffer[i]);
+			//}
+			//printf("\n");
+			if (last_timestamp == 0)
+				last_timestamp = timestamp;
+
+			if (last_timestamp != timestamp) {
+
+				index -= 7;
+				fp_writes++;
+				// log_data(fp_writes, num_sensors, sample, log_fp,
+				// 	last_timestamp);
+
+				index = 0;
+				last_timestamp = timestamp;
+			}
+
+			//printf("\nindex=%d\n", index);
+			for (j = 0; j < num_sensors; j++) {
+				//printf("j = %d\n", j);
+				for (i = 0; i < 7; i++) {
+					//printf("\ni=%d\n", (i+index));
+					value = buffer[i*4+1+j*28];
+					value <<= 8;
+					value += buffer[i*4+j*28];
+					I[j][i+index] = value;
+					
+					value = buffer[i*4+3+j*28];
+					value <<= 8;
+					value += buffer[i*4+2+j*28];
+					Q[j][i+index] = value;
+					//printf("%d, %d", I[j][i], Q[j][i]);
+				}
+			}
+
+			//printf("\n");
+			index += 7;
+
+			ptr = buffer + 28*num_sensors;
+
+			// printf("Here11");
+			for (j = 0; j < num_sensors; j++) {
+				distance[j] = ptr[1+j*2];
+				distance[j] <<= 8;
+				distance[j] += ptr[j*2];
+				
+				printf("distance[%d]=%d\n", j, distance[j]);
+			}
+
+
+			ptr += 2*num_sensors;
+
+			for (j = 0; j < num_sensors; j++) {
+				amplitude[j] = ptr[1+j*2];
+				amplitude[j] <<= 8;
+				amplitude[j] += ptr[j*2];
+			}
+
+			ptr += 2*num_sensors;
+
+			for (j = 0; j < num_sensors; j++)
+				mode[j] = ptr[j];
+			}	
+			else
+			{
+                printf("Expected %d bytes, read %d\n",bytes,target_bytes);
+				retry++;
+				if(retry < 6)
+				{
+				  printf("Max retry reached\n");
+				  break;
+				}
+			}	
+		}
+	}
+	switch_streaming(0);
+	fclose(log_fp);
+}
+
+void setFreq(int freq){
+
+	char* fn = "/sys/bus/iio/devices/iio:device4/sampling_frequency";
+	//sets freq
+	fp = fopen(fn, "wt");
+	if (fp == NULL) {
+		printf("error opening %s\n", fn);
+		exit(0);
+	} else {
+		printf("set freq open %s OK\n", fn);
+	}
+	fprintf(fp, "%d", freq);
+	fclose(fp);
+}
+
+void setCnt(int cnt){
+	char* fn = "/sys/bus/iio/devices/iio:device4/calibbias";
+	printf("counter=%d\n", cnt);
+
+	// counter controls how many times it will run.
+	// snprintf(fn, 100, "%s/calibbias", sysfs_path);
+	fp = fopen(fn, "wt");
+	if (fp == NULL) {
+		printf("error opening %s\n", fn);
+		exit(0);
+	} else {
+		printf("open %s OK\n", fn);
+	}
+	fprintf(fp, "%d", cnt);
+	fclose(fp);
+}
+
+
 
 int main(int argc, char *argv[])
 {
@@ -1141,7 +1519,20 @@ int main(int argc, char *argv[])
 	int freq = 5;
 	int counter = init(dur,sample,freq);
 
-	getData(counter);
+	setCnt(1);
+	setFreq(5);
+
+	// getData(counter);
+
+	// getData2(counter);
+
+
+	// printf("run2\n");
+	// getPositionRelativeData(1);
+
+	// setFreq(5);
+	// printf("Poll Data Start\n");
+	pollData(3);
 
 	return 0;
 }
