@@ -1,0 +1,120 @@
+
+
+TDK-Robotics-RB5-chx01-app-0.7
+
+options, log file=/usr/chirp.csv, frequency=5, samples=225, duration=10 seconds
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+set freq open /sys/bus/iio/devices/iio:device4/sampling_frequency OK
+DEVPATH: /dev/iio:device4
+counter: 0, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 1, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 2, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 3, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 4, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 5, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 6, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 7, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 8, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 9, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 10, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 11, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 12, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 13, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 14, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 15, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 16, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 17, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 18, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 19, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 20, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 21, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 22, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 23, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 24, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 25, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 26, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 27, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 28, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 29, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 30, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 31, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 32, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 33, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 34, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 35, pass fd  4, poll 0x0, ready=0
+counter=10
+open /sys/bus/iio/devices/iio:device4/calibbias OK
+counter: 36, pass fd  4, poll 0x0, ready=0
+counter=10
+o

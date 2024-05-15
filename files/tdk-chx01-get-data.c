@@ -1120,6 +1120,7 @@ void getData(int counter){
 				}
 			}	
 		}
+		setCnt(10);
 	}
 	switch_streaming(0);
 	fclose(log_fp);
@@ -1365,7 +1366,8 @@ void pollData(int frequency){
 	fp_writes = 1;
 	int index = 0; //redefined in confSensors
 	int cnt = 0;
-	while (ready==1) {
+	// setCnt(10);
+	while (1) {
 		char *tmp;
 		short value;
 		char *ptr;
@@ -1473,6 +1475,7 @@ void pollData(int frequency){
 				}
 			}	
 		}
+		// setCnt(10);
 	}
 	switch_streaming(0);
 	fclose(log_fp);
@@ -1515,14 +1518,14 @@ void setCnt(int cnt){
 int main(int argc, char *argv[])
 {
 	int dur = 10;
-	int sample = 80;
+	int sample = 500;
 	int freq = 5;
 	int counter = init(dur,sample,freq);
 
-	setCnt(1);
+	setCnt(10);
 	setFreq(5);
 
-	// getData(counter);
+	getData(counter);
 
 	// getData2(counter);
 
@@ -1532,7 +1535,7 @@ int main(int argc, char *argv[])
 
 	// setFreq(5);
 	// printf("Poll Data Start\n");
-	pollData(3);
+	// pollData(3);
 
 	return 0;
 }
