@@ -19,4 +19,3 @@ $(LIB): $(OBJ).o
 
 clean:
 		rm -f *.o *~ core $(INCDIR)/*~ $(OBJ) $(LIB)
-

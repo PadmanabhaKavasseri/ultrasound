@@ -1,1 +1,1 @@
-/usr/bin/c++   -Wunused-variable   CMakeFiles/MyProject.dir/main.cpp.o  -o MyProject  -ltdk-chx01-get-data 
+/usr/bin/c++  -Wunused-variable CMakeFiles/MyProject.dir/main.cpp.o -o MyProject  -ltdk-chx01-get-data 

@@ -83,12 +83,12 @@ union InvnCliffDetection {
 #define CH201_DEFAULT_FW       5
 
 
-#define FILE_PATH_0 "/sys/bus/iio/devices/iio:device4/in_positionrelative18_raw"
-#define FILE_PATH_1 "/sys/bus/iio/devices/iio:device4/in_positionrelative19_raw"
-#define FILE_PATH_2 "/sys/bus/iio/devices/iio:device4/in_positionrelative20_raw"
-#define FILE_PATH_3 "/sys/bus/iio/devices/iio:device4/in_positionrelative21_raw"
-#define FILE_PATH_4 "/sys/bus/iio/devices/iio:device4/in_positionrelative22_raw"
-#define FILE_PATH_5 "/sys/bus/iio/devices/iio:device4/in_positionrelative23_raw"
+#define FILE_PATH_0 "/sys/bus/iio/devices/iio:device0/in_positionrelative18_raw"
+#define FILE_PATH_1 "/sys/bus/iio/devices/iio:device0/in_positionrelative19_raw"
+#define FILE_PATH_2 "/sys/bus/iio/devices/iio:device0/in_positionrelative20_raw"
+#define FILE_PATH_3 "/sys/bus/iio/devices/iio:device0/in_positionrelative21_raw"
+#define FILE_PATH_4 "/sys/bus/iio/devices/iio:device0/in_positionrelative22_raw"
+#define FILE_PATH_5 "/sys/bus/iio/devices/iio:device0/in_positionrelative23_raw"
 
 
 
@@ -1483,7 +1483,7 @@ void pollData(int frequency){
 
 void setFreq(int freq){
 
-	char* fn = "/sys/bus/iio/devices/iio:device4/sampling_frequency";
+	char* fn = "/sys/bus/iio/devices/iio:device0/sampling_frequency";
 	//sets freq
 	fp = fopen(fn, "wt");
 	if (fp == NULL) {
@@ -1497,7 +1497,7 @@ void setFreq(int freq){
 }
 
 void setCnt(int cnt){
-	char* fn = "/sys/bus/iio/devices/iio:device4/calibbias";
+	char* fn = "/sys/bus/iio/devices/iio:device0/calibbias";
 	printf("counter=%d\n", cnt);
 
 	// counter controls how many times it will run.
