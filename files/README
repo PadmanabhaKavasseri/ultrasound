@@ -1,0 +1,12 @@
+This application will automatically detect whether the IIO devices is created.  If IIO device is not created, it will print 
+a warning and exit. Otherewise, it will execute depending on the parameters it is given.
+
+Usage:
+-h: print this help
+-d x: duration,  unit in seconds. default: 10 seconds
+-s x: number of samples. default: 40 samples
+-f x: sampling frequency. Default: 5 Hz
+-l string: output logging file name. Default: /usr/chirp.csv
+
+If this application is issued without any parameter, it will be executed with default parameters.
+
