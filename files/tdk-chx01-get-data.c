@@ -22,6 +22,8 @@
 #include <string.h>
 
 #include "invn_algo_rangefinder.h"
+#include <bits/poll.h>
+#include "../../../usr/include/asm-generic/poll.h"
 
 long long orig_buffer[32];
 
@@ -76,6 +78,22 @@ static char *firmware_path;
 static char sysfs_path[MAX_SYSFS_NAME_LEN] = {0};
 static char dev_path[MAX_SYSFS_NAME_LEN] = {0};
 static char sensor_connection[6];
+
+
+
+
+FILE *fp;
+FILE *log_fp;
+int dur, freq;
+
+//is updated by splitfunc1 and used in main
+int scan_bytes; 
+
+
+
+
+
+
 
 static int init_algo(int samples, int16_t *iq_buffer)
 {
@@ -588,29 +606,35 @@ void log_data(int num_sensors, int sample, FILE *log_fp,
 	}
 }
 
-int main(int argc, char *argv[])
-{
-	FILE *fp;
-	FILE *log_fp;
-	char *buffer;
-	char file_name[100];
-	int i, j, bytes;
-	int total_bytes;
-	int target_bytes;
-	int scan_bytes;
-	long long timestamp, last_timestamp;
-	int counter;
-	int num_sensors;
-	int ready;
-	int index;
-	int nfds, num_open_fds;
-	struct pollfd pfds[1];
-	int dur, sample, freq;
-	char *log_file;
-	int c, fp_writes;
-	int load_firmware_flag;
 
-	buffer = (char *)orig_buffer;
+
+
+void splitFunc1(){
+	
+	// char *buffer;
+	char file_name[100];
+	int i;
+	// int bytes;
+	// int total_bytes;
+	// int target_bytes; //duplicate
+	// int scan_bytes; //duplicate
+	long long timestamp, last_timestamp; //duplicate declarations
+	int counter; //duplicate 
+	int num_sensors; //duplicate 
+	// int ready;
+	int index; //duplicate declarations
+	// int nfds;
+	int num_open_fds;
+	// struct pollfd pfds[1];
+	// int dur, sample, freq;
+	char *log_file; //duplicate // imo should be global
+	int c;
+	int fp_writes;
+
+	
+
+
+
 	printf("TDK-Robotics-RB5-chx01-app-%d.%d\n",VER_MAJOR,VER_MINOR);
 
 	// get absolute IIO path & build MPU's sysfs paths
@@ -622,63 +646,39 @@ int main(int argc, char *argv[])
 	printf("%s sysfs path: %s, dev path=%s\n",
 		CHIRP_NAME, sysfs_path, dev_path);
 
-	dur = 20;
-	sample = 80;
-	freq = 5;
+	dur = 50;
+	// sample = 80;
+	freq = 10;
 	log_file = "/usr/chirp.csv";
-	load_firmware_flag = 1;
 
-	opterr = 0;
-	while ((c = getopt(argc, argv, "hd:s:f:l:n")) != -1) {
-		switch (c) {
-		case 'h':
-			print_help();
-			return 0;
-		case 'd':
-			dur = atoi(optarg);
-			break;
-		case 's':
-			sample = atoi(optarg);
-			break;
-		case 'f':
-			freq = atoi(optarg);
-			break;
-		case 'l':
-			log_file = optarg;
-			break;
-		case 'n':
-			load_firmware_flag = 0;
-			break;
-		default:
-			abort();
-		}
-	}
+
+
 	if (freq > 10)
 		freq = 10;
-	if (sample > 225)
-		sample = 225;
+	// if (sample > 225)
+	// 	sample = 225;
 
-	printf(
-"options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
-	log_file, freq, sample, dur);
+// 	printf(
+// "options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
+// 	log_file, freq, sample, dur);
 
-	printf("firmware load=%d\n", load_firmware_flag);
-	if (load_firmware_flag) {
-		if (inv_load_dmp(sysfs_path,
-			CH101_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-			printf("CH101 firmware fail\n");
-			return -EINVAL;
-		}
 
-		if (inv_load_dmp(sysfs_path,
-			CH201_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-			printf("CH201 firmware fail\n");
-			return -EINVAL;
-		}
+	if (inv_load_dmp(sysfs_path,
+		CH101_DEFAULT_FW, FIRMWARE_PATH) != 0) {
+		printf("CH101 firmware fail\n");
+		return -EINVAL;
+	}
+
+	if (inv_load_dmp(sysfs_path,
+		CH201_DEFAULT_FW, FIRMWARE_PATH) != 0) {
+		printf("CH201 firmware fail\n");
+		return -EINVAL;
 	}
 
 	index = 0;
 	counter = freq*dur;
+
+	int sample = 255;
 
 	if (init_algo(sample, iq_buffer)) {
 		printf("algo init error\n");
@@ -751,7 +751,172 @@ int main(int argc, char *argv[])
 	}
 	fprintf(fp, "%d", freq);
 	fclose(fp);
+}
 
+
+int main(int argc, char *argv[])
+{
+	// FILE *fp;
+	// FILE *log_fp;
+	// char *buffer;
+	// char file_name[100];
+	// int i, j, bytes;
+	// int total_bytes;
+	// int target_bytes;
+	// int scan_bytes;
+	// long long timestamp, last_timestamp;
+	// int counter;
+	// int num_sensors;
+	// int ready;
+	// int index;
+	// int nfds, num_open_fds;
+	// struct pollfd pfds[1];
+	// int dur, sample, freq;
+	// char *log_file;
+	// int c, fp_writes;
+
+	char *buffer;
+	int total_bytes;
+	int ready;
+	long long timestamp, last_timestamp;
+	int fp_writes;
+	int nfds;
+	int target_bytes;
+	struct pollfd pfds[1];
+	int scan_bytes;
+	int bytes;
+	int index;
+
+	int num_sensors;
+
+	int j;
+
+	int counter = 100;
+
+	buffer = (char *)orig_buffer;
+
+	/*
+// 	printf("TDK-Robotics-RB5-chx01-app-%d.%d\n",VER_MAJOR,VER_MINOR);
+
+// 	// get absolute IIO path & build MPU's sysfs paths
+// 	if (process_sysfs_request(sysfs_path) < 0) {
+// 		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
+// 		exit(0);
+// 	}
+
+// 	printf("%s sysfs path: %s, dev path=%s\n",
+// 		CHIRP_NAME, sysfs_path, dev_path);
+
+// 	dur = 20;
+// 	sample = 80;
+// 	freq = 5;
+// 	log_file = "/usr/chirp.csv";
+
+
+
+// 	if (freq > 10)
+// 		freq = 10;
+// 	if (sample > 225)
+// 		sample = 225;
+
+// 	printf(
+// "options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
+// 	log_file, freq, sample, dur);
+
+
+// 	if (inv_load_dmp(sysfs_path,
+// 		CH101_DEFAULT_FW, FIRMWARE_PATH) != 0) {
+// 		printf("CH101 firmware fail\n");
+// 		return -EINVAL;
+// 	}
+
+// 	if (inv_load_dmp(sysfs_path,
+// 		CH201_DEFAULT_FW, FIRMWARE_PATH) != 0) {
+// 		printf("CH201 firmware fail\n");
+// 		return -EINVAL;
+// 	}
+
+// 	index = 0;
+// 	counter = freq*dur;
+
+// 	if (init_algo(sample, iq_buffer)) {
+// 		printf("algo init error\n");
+// 		exit(0);
+// 	}
+
+// 	for (i = 0; i < 6; i++) {
+// 		snprintf(file_name, 100, "%s/in_positionrelative%d_raw",
+// 			sysfs_path, i+18);
+// 		fp = fopen(file_name, "wt");
+// 		if (fp == NULL) {
+// 			printf("error opening %s\n", file_name);
+// 			exit(0);
+// 		} else {
+// 			//printf("open %s OK, with %d\n", file_name, sample);
+// 		}
+// 		fprintf(fp, "%d", sample);
+// 		fclose(fp);
+// 	}
+
+// 	check_sensor_connection();
+
+// 	last_timestamp = 0;
+// 	timestamp = 0;
+// 	scan_bytes = 0;
+// 	num_sensors = 0;
+// 	for (i = 0; i < 6; i++) {
+// 		scan_bytes += sensor_connected[i]*32;
+// 		num_sensors += sensor_connected[i];
+// 	}
+// 	index = 0;
+// 	for (i = 0; i < 6; i++) {
+// 		if (sensor_connected[i] == 1) {
+// 			sensor_connection[index] = i;
+// 			index++;
+// 		}
+// 	}
+
+// 	log_fp = fopen(log_file, "wt");
+// 	if (log_fp == NULL) {
+// 		printf("error opening log file %s\n", log_file);
+// 		exit(0);
+// 	}
+// 	print_header(sample, freq, log_fp);
+
+// 	scan_bytes += 32;
+
+// 	printf("counter=%d\n", counter);
+
+// 	// counter controls how many times it will run.
+// 	snprintf(file_name, 100, "%s/calibbias", sysfs_path);
+// 	fp = fopen(file_name, "wt");
+// 	if (fp == NULL) {
+// 		printf("error opening %s\n", file_name);
+// 		exit(0);
+// 	} else {
+// 		printf("open %s OK\n", file_name);
+// 	}
+// 	fprintf(fp, "%d", counter);
+// 	fclose(fp);
+
+// 	snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
+
+// 	fp = fopen(file_name, "wt");
+// 	if (fp == NULL) {
+// 		printf("error opening %s\n", file_name);
+// 		exit(0);
+// 	} else {
+// 		printf("open %s OK\n", file_name);
+// 	}
+// 	fprintf(fp, "%d", freq);
+// 	fclose(fp);
+
+*/
+
+
+	splitFunc1();
+
+	// should be start of pollData
 	total_bytes = 0;
 	switch_streaming(1);
 
@@ -785,7 +950,7 @@ int main(int argc, char *argv[])
 			//amplitude 2 bytes + intensity data
 			//2 bytes 224/8 = 28bytes(IQ)+mode(1 bytes)
 			target_bytes = scan_bytes-32;
-			i = 0;
+			int i = 0;
 			//for (i = 0; i < 64; i++) {
 				//printf("%d, ", buffer[i]);
 			//}
@@ -797,7 +962,7 @@ int main(int argc, char *argv[])
 
 				index -= 7;
 				fp_writes++;
-				log_data(num_sensors, sample, log_fp,
+				log_data(num_sensors, 225/*sample*/, log_fp,
 					last_timestamp);
 
 				index = 0;
@@ -829,7 +994,7 @@ int main(int argc, char *argv[])
 				distance[j] = ptr[1+j*2];
 				distance[j] <<= 8;
 				distance[j] += ptr[j*2];
-				printf("distance[%d]=%d\n", j, distance[j]);
+				printf("distance[%d]=%d\n", j, distance[j]); //print distance
 			}
 
 
