@@ -22,8 +22,8 @@
 #include <string.h>
 
 #include "invn_algo_rangefinder.h"
-#include <bits/poll.h>
-#include "../../../usr/include/asm-generic/poll.h"
+// #include <bits/poll.h>
+// #include "../../../usr/include/asm-generic/poll.h"
 
 long long orig_buffer[32];
 
@@ -88,6 +88,7 @@ int dur, freq;
 
 //is updated by splitfunc1 and used in main
 int scan_bytes; 
+int num_sensors; 
 
 
 
@@ -345,7 +346,7 @@ int switch_streaming(int on)
 
 	FILE *fp;
 	char file_name[100];
-
+	// printf("In Switch Streaming\n");
 	for (i = 0; i < 6; i++) {
 		snprintf(file_name, 100, "%s/scan_elements/in_proximity%d_en",
 			sysfs_path, i);
@@ -405,6 +406,8 @@ int switch_streaming(int on)
 		fclose(fp);
 	}
 
+
+	// printf("Here1 Streaming\n");
 	snprintf(file_name, 100, "%s/scan_elements/in_timestamp_en",
 		sysfs_path);
 	fp = fopen(file_name, "wt");
@@ -417,6 +420,7 @@ int switch_streaming(int on)
 	fprintf(fp, "%d", on);
 	fclose(fp);
 
+	// printf("Here2 Streaming\n");
 	snprintf(file_name, 100, "%s/buffer/length", sysfs_path);
 	fp = fopen(file_name, "wt");
 	if (fp == NULL) {
@@ -428,6 +432,8 @@ int switch_streaming(int on)
 	fprintf(fp, "%d", 2000);
 	fclose(fp);
 
+
+	// printf("Here3 Streaming\n");
 	snprintf(file_name, 100, "%s/buffer/watermark", sysfs_path);
 	fp = fopen(file_name, "wt");
 	if (fp == NULL) {
@@ -439,6 +445,7 @@ int switch_streaming(int on)
 	fprintf(fp, "%d", 1);
 	fclose(fp);
 
+	// printf("Here4 Streaming\n");
 	snprintf(file_name, 100, "%s/buffer/enable", sysfs_path);
 	fp = fopen(file_name, "wt");
 	if (fp == NULL) {
@@ -449,7 +456,7 @@ int switch_streaming(int on)
 	}
 	fprintf(fp, "%d", 1 & on);
 	fclose(fp);
-
+	printf("Here5 Streaming\n");
 }
 
 int16_t I[6][MAX_NUM_SAMPLES], Q[6][MAX_NUM_SAMPLES];
@@ -620,7 +627,7 @@ void splitFunc1(){
 	// int scan_bytes; //duplicate
 	long long timestamp, last_timestamp; //duplicate declarations
 	int counter; //duplicate 
-	int num_sensors; //duplicate 
+	// int num_sensors; //duplicate 
 	// int ready;
 	int index; //duplicate declarations
 	// int nfds;
@@ -633,7 +640,7 @@ void splitFunc1(){
 
 	
 
-
+	printf("Sanity Check\n");
 
 	printf("TDK-Robotics-RB5-chx01-app-%d.%d\n",VER_MAJOR,VER_MINOR);
 
@@ -783,11 +790,11 @@ int main(int argc, char *argv[])
 	int nfds;
 	int target_bytes;
 	struct pollfd pfds[1];
-	int scan_bytes;
+	// int scan_bytes;
 	int bytes;
 	int index;
 
-	int num_sensors;
+	// int num_sensors;
 
 	int j;
 
@@ -913,18 +920,22 @@ int main(int argc, char *argv[])
 
 */
 
-
+	printf("Before Split\n");
 	splitFunc1();
-
+	printf("After Split\n");
 	// should be start of pollData
 	total_bytes = 0;
 	switch_streaming(1);
 
+	printf("After Switch Streaming\n");
 
 	pfds[0].fd = open(dev_path, O_RDONLY);
 	pfds[0].events = (POLLIN | POLLRDNORM);
 	last_timestamp = 0;
 
+
+
+	printf("After PFDS1\n");
 	ready = 1;
 	fp_writes = 1;
 	while (ready == 1) {
@@ -938,15 +949,20 @@ int main(int argc, char *argv[])
 		//printf("before new polling counter=%d\n", counter);
 		nfds = 1;
 		ready = poll(pfds, nfds, 5000);
-		//printf("pass poll 0x%x, ready=%d\n", pfds[0].revents, ready);
+		printf("pass poll 0x%x, ready=%d\n", pfds[0].revents, ready);
 		if (ready == -1)
 			printf("poll error\n");
+		
+		// printf("Here1\n");
 		if (pfds[0].revents & (POLLIN | POLLRDNORM)) {
+			// printf("Here2\n");
 			target_bytes = scan_bytes;
+			printf("Target_bytes: %d Scan_bytes: %d\n",target_bytes,scan_bytes);
 			bytes = read(pfds[0].fd, buffer, target_bytes);
 			total_bytes += bytes;
 			tmp = (char *)&timestamp;
 			memcpy(tmp, &buffer[scan_bytes - 8], 8);
+			// printf("Here3\n");
 			//amplitude 2 bytes + intensity data
 			//2 bytes 224/8 = 28bytes(IQ)+mode(1 bytes)
 			target_bytes = scan_bytes-32;
@@ -968,7 +984,9 @@ int main(int argc, char *argv[])
 				index = 0;
 				last_timestamp = timestamp;
 			}
-
+			// printf("Here4\n");
+			// printf("Sanity Check: 2\n");
+			// printf("Num Sensors:%d \n",num_sensors);
 			//printf("\nindex=%d\n", index);
 			for (j = 0; j < num_sensors; j++) {
 				for (i = 0; i < 7; i++) {
@@ -985,17 +1003,20 @@ int main(int argc, char *argv[])
 					//printf("%d, %d", I[j][i], Q[j][i]);
 				}
 			}
+			// printf("Here5\n");
+			
 			//printf("\n");
 			index += 7;
 
 			ptr = buffer + 28*num_sensors;
-
+			
 			for (j = 0; j < num_sensors; j++) {
 				distance[j] = ptr[1+j*2];
 				distance[j] <<= 8;
 				distance[j] += ptr[j*2];
 				printf("distance[%d]=%d\n", j, distance[j]); //print distance
 			}
+			// printf("Here6\n");
 
 
 			ptr += 2*num_sensors;
@@ -1005,12 +1026,14 @@ int main(int argc, char *argv[])
 				amplitude[j] <<= 8;
 				amplitude[j] += ptr[j*2];
 			}
-
+			// printf("Here7\n");
 			ptr += 2*num_sensors;
 
 			for (j = 0; j < num_sensors; j++)
 				mode[j] = ptr[j];
 		}
+		// printf("Here44\n");
+		
 	}
 	switch_streaming(0);
 	fclose(log_fp);
