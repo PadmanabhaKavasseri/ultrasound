@@ -89,7 +89,7 @@ int dur, freq;
 //is updated by splitfunc1 and used in main
 int scan_bytes; 
 int num_sensors; 
-
+char file_name[100];
 
 
 
@@ -614,12 +614,41 @@ void log_data(int num_sensors, int sample, FILE *log_fp,
 }
 
 
+void setCounter(int counter){
+	printf("counter=%d\n", counter);
+
+	// counter controls how many times it will run.
+	snprintf(file_name, 100, "%s/calibbias", sysfs_path);
+	fp = fopen(file_name, "wt");
+	if (fp == NULL) {
+		printf("error opening %s\n", file_name);
+		exit(0);
+	} else {
+		printf("open %s OK\n", file_name);
+	}
+	fprintf(fp, "%d", counter);
+	fclose(fp);
+}
+
+void setFreq(int freq){
+	snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
+
+	fp = fopen(file_name, "wt");
+	if (fp == NULL) {
+		printf("error opening %s\n", file_name);
+		exit(0);
+	} else {
+		printf("open %s OK\n", file_name);
+	}
+	fprintf(fp, "%d", freq);
+	fclose(fp);
+}
 
 
 void splitFunc1(){
 	
 	// char *buffer;
-	char file_name[100];
+	// char file_name[100];
 	int i;
 	// int bytes;
 	// int total_bytes;
@@ -640,7 +669,7 @@ void splitFunc1(){
 
 	
 
-	printf("Sanity Check\n");
+	// printf("Sanity Check\n");
 
 	printf("TDK-Robotics-RB5-chx01-app-%d.%d\n",VER_MAJOR,VER_MINOR);
 
@@ -654,16 +683,9 @@ void splitFunc1(){
 		CHIRP_NAME, sysfs_path, dev_path);
 
 	dur = 50;
-	// sample = 80;
 	freq = 10;
 	log_file = "/usr/chirp.csv";
 
-
-
-	if (freq > 10)
-		freq = 10;
-	// if (sample > 225)
-	// 	sample = 225;
 
 // 	printf(
 // "options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
@@ -733,197 +755,28 @@ void splitFunc1(){
 
 	scan_bytes += 32;
 
-	printf("counter=%d\n", counter);
+	setCounter(1);
 
-	// counter controls how many times it will run.
-	snprintf(file_name, 100, "%s/calibbias", sysfs_path);
-	fp = fopen(file_name, "wt");
-	if (fp == NULL) {
-		printf("error opening %s\n", file_name);
-		exit(0);
-	} else {
-		printf("open %s OK\n", file_name);
-	}
-	fprintf(fp, "%d", counter);
-	fclose(fp);
+	setFreq(5);
 
-	snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
-
-	fp = fopen(file_name, "wt");
-	if (fp == NULL) {
-		printf("error opening %s\n", file_name);
-		exit(0);
-	} else {
-		printf("open %s OK\n", file_name);
-	}
-	fprintf(fp, "%d", freq);
-	fclose(fp);
+	// printf("Filename: %s\n",file_name);
 }
 
-
-int main(int argc, char *argv[])
-{
-	// FILE *fp;
-	// FILE *log_fp;
-	// char *buffer;
-	// char file_name[100];
-	// int i, j, bytes;
-	// int total_bytes;
-	// int target_bytes;
-	// int scan_bytes;
-	// long long timestamp, last_timestamp;
-	// int counter;
-	// int num_sensors;
-	// int ready;
-	// int index;
-	// int nfds, num_open_fds;
-	// struct pollfd pfds[1];
-	// int dur, sample, freq;
-	// char *log_file;
-	// int c, fp_writes;
-
+void getData(){
 	char *buffer;
 	int total_bytes;
-	int ready;
+	struct pollfd pfds[1];
 	long long timestamp, last_timestamp;
+	int ready;
 	int fp_writes;
 	int nfds;
 	int target_bytes;
-	struct pollfd pfds[1];
-	// int scan_bytes;
 	int bytes;
-	int index;
-
-	// int num_sensors;
-
+	int index = 0;
 	int j;
-
-	int counter = 100;
 
 	buffer = (char *)orig_buffer;
 
-	/*
-// 	printf("TDK-Robotics-RB5-chx01-app-%d.%d\n",VER_MAJOR,VER_MINOR);
-
-// 	// get absolute IIO path & build MPU's sysfs paths
-// 	if (process_sysfs_request(sysfs_path) < 0) {
-// 		printf("Cannot find %s sysfs path\n", CHIRP_NAME);
-// 		exit(0);
-// 	}
-
-// 	printf("%s sysfs path: %s, dev path=%s\n",
-// 		CHIRP_NAME, sysfs_path, dev_path);
-
-// 	dur = 20;
-// 	sample = 80;
-// 	freq = 5;
-// 	log_file = "/usr/chirp.csv";
-
-
-
-// 	if (freq > 10)
-// 		freq = 10;
-// 	if (sample > 225)
-// 		sample = 225;
-
-// 	printf(
-// "options, log file=%s, frequency=%d, samples=%d, duration=%d seconds\n",
-// 	log_file, freq, sample, dur);
-
-
-// 	if (inv_load_dmp(sysfs_path,
-// 		CH101_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-// 		printf("CH101 firmware fail\n");
-// 		return -EINVAL;
-// 	}
-
-// 	if (inv_load_dmp(sysfs_path,
-// 		CH201_DEFAULT_FW, FIRMWARE_PATH) != 0) {
-// 		printf("CH201 firmware fail\n");
-// 		return -EINVAL;
-// 	}
-
-// 	index = 0;
-// 	counter = freq*dur;
-
-// 	if (init_algo(sample, iq_buffer)) {
-// 		printf("algo init error\n");
-// 		exit(0);
-// 	}
-
-// 	for (i = 0; i < 6; i++) {
-// 		snprintf(file_name, 100, "%s/in_positionrelative%d_raw",
-// 			sysfs_path, i+18);
-// 		fp = fopen(file_name, "wt");
-// 		if (fp == NULL) {
-// 			printf("error opening %s\n", file_name);
-// 			exit(0);
-// 		} else {
-// 			//printf("open %s OK, with %d\n", file_name, sample);
-// 		}
-// 		fprintf(fp, "%d", sample);
-// 		fclose(fp);
-// 	}
-
-// 	check_sensor_connection();
-
-// 	last_timestamp = 0;
-// 	timestamp = 0;
-// 	scan_bytes = 0;
-// 	num_sensors = 0;
-// 	for (i = 0; i < 6; i++) {
-// 		scan_bytes += sensor_connected[i]*32;
-// 		num_sensors += sensor_connected[i];
-// 	}
-// 	index = 0;
-// 	for (i = 0; i < 6; i++) {
-// 		if (sensor_connected[i] == 1) {
-// 			sensor_connection[index] = i;
-// 			index++;
-// 		}
-// 	}
-
-// 	log_fp = fopen(log_file, "wt");
-// 	if (log_fp == NULL) {
-// 		printf("error opening log file %s\n", log_file);
-// 		exit(0);
-// 	}
-// 	print_header(sample, freq, log_fp);
-
-// 	scan_bytes += 32;
-
-// 	printf("counter=%d\n", counter);
-
-// 	// counter controls how many times it will run.
-// 	snprintf(file_name, 100, "%s/calibbias", sysfs_path);
-// 	fp = fopen(file_name, "wt");
-// 	if (fp == NULL) {
-// 		printf("error opening %s\n", file_name);
-// 		exit(0);
-// 	} else {
-// 		printf("open %s OK\n", file_name);
-// 	}
-// 	fprintf(fp, "%d", counter);
-// 	fclose(fp);
-
-// 	snprintf(file_name, 100, "%s/sampling_frequency", sysfs_path);
-
-// 	fp = fopen(file_name, "wt");
-// 	if (fp == NULL) {
-// 		printf("error opening %s\n", file_name);
-// 		exit(0);
-// 	} else {
-// 		printf("open %s OK\n", file_name);
-// 	}
-// 	fprintf(fp, "%d", freq);
-// 	fclose(fp);
-
-*/
-
-	printf("Before Split\n");
-	splitFunc1();
-	printf("After Split\n");
-	// should be start of pollData
 	total_bytes = 0;
 	switch_streaming(1);
 
@@ -949,11 +802,11 @@ int main(int argc, char *argv[])
 		//printf("before new polling counter=%d\n", counter);
 		nfds = 1;
 		ready = poll(pfds, nfds, 5000);
-		printf("pass poll 0x%x, ready=%d\n", pfds[0].revents, ready);
+		// printf("pass poll 0x%x, ready=%d\n", pfds[0].revents, ready);
 		if (ready == -1)
 			printf("poll error\n");
 		
-		// printf("Here1\n");
+		printf("Here1\n");
 		if (pfds[0].revents & (POLLIN | POLLRDNORM)) {
 			// printf("Here2\n");
 			target_bytes = scan_bytes;
@@ -962,7 +815,7 @@ int main(int argc, char *argv[])
 			total_bytes += bytes;
 			tmp = (char *)&timestamp;
 			memcpy(tmp, &buffer[scan_bytes - 8], 8);
-			// printf("Here3\n");
+			printf("Here3\n");
 			//amplitude 2 bytes + intensity data
 			//2 bytes 224/8 = 28bytes(IQ)+mode(1 bytes)
 			target_bytes = scan_bytes-32;
@@ -984,9 +837,9 @@ int main(int argc, char *argv[])
 				index = 0;
 				last_timestamp = timestamp;
 			}
-			// printf("Here4\n");
-			// printf("Sanity Check: 2\n");
-			// printf("Num Sensors:%d \n",num_sensors);
+			printf("Here4\n");
+			printf("Sanity Check: 2\n");
+			printf("Num Sensors:%d \n",num_sensors);
 			//printf("\nindex=%d\n", index);
 			for (j = 0; j < num_sensors; j++) {
 				for (i = 0; i < 7; i++) {
@@ -1003,7 +856,7 @@ int main(int argc, char *argv[])
 					//printf("%d, %d", I[j][i], Q[j][i]);
 				}
 			}
-			// printf("Here5\n");
+			printf("Here5\n");
 			
 			//printf("\n");
 			index += 7;
@@ -1016,7 +869,7 @@ int main(int argc, char *argv[])
 				distance[j] += ptr[j*2];
 				printf("distance[%d]=%d\n", j, distance[j]); //print distance
 			}
-			// printf("Here6\n");
+			printf("Here6\n");
 
 
 			ptr += 2*num_sensors;
@@ -1026,22 +879,51 @@ int main(int argc, char *argv[])
 				amplitude[j] <<= 8;
 				amplitude[j] += ptr[j*2];
 			}
-			// printf("Here7\n");
+			printf("Here7\n");
 			ptr += 2*num_sensors;
 
 			for (j = 0; j < num_sensors; j++)
 				mode[j] = ptr[j];
 		}
-		// printf("Here44\n");
+		printf("Here44\n");
+		setCounter(10);
 		
 	}
+}
+
+int main(int argc, char *argv[])
+{
+	
+	
+	
+	
+	
+	
+	
+	
+	// int scan_bytes;
+	
+
+	// int num_sensors;
+
+	
+
+	int counter = 100;
+
+	
+
+	printf("Before Split\n");
+	splitFunc1();
+	printf("After Split\n");
+	// should be start of pollData
+	getData();
 	switch_streaming(0);
 	fclose(log_fp);
 
-	if (fp_writes == counter)
-		printf("PASS: setting=%d, get=%d\n", counter, fp_writes);
-	else
-		printf("FAIL: setting=%d, get=%d\n", counter, fp_writes);
+	// if (fp_writes == counter)
+	// 	printf("PASS: setting=%d, get=%d\n", counter, fp_writes);
+	// else
+	// 	printf("FAIL: setting=%d, get=%d\n", counter, fp_writes);
 
 
 	return 0;
