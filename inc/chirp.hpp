@@ -9,7 +9,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <string>
 
 
 #include <vector>
@@ -68,11 +68,17 @@ char file_name[100];
 
 class Chirp {
 public:
+    Chirp();
+    void setCounter(int counter);
+    void setFreq(int freq);
     std::vector<int> getDataOnce();
-    int init();
+    void stopData();
+    
 private:
+    int init();
     std::string dev_path_ = "/dev/iio:device0";
     std::string sysfs_path_ = "/sys/bus/iio/devices/iio:device0";
+    std::string firmware_file_ = "sys/bus/iio/devices/iio:device0/misc_bin_dmp_firmware_vers";
 
 
 };
